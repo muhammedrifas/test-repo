@@ -1,5 +1,5 @@
 
-from code.db import db
+from db import db
 
 
 class ItemModel(db.Model):

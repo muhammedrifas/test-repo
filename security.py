@@ -1,4 +1,4 @@
-from code.models.user import UserModel
+from models.user import UserModel
 import hmac
 
 
