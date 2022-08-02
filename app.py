@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 
 from flask import Flask
@@ -15,7 +16,8 @@ app = Flask(__name__)
 app.secret_key = 'my_secret_key'
 app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=6000)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://')
 api = Api(app)
 
 jwt = JWT(app, authenticate, identity)
@@ -26,11 +28,14 @@ api.add_resource(UserRegister, '/register')
 api.add_resource(Store, '/store/<string:name>')
 api.add_resource(StoreList, '/stores')
 
-db.init_app(app)
-from models.item import ItemModel
-from models.user import UserModel
-from models.store import StoreModel
+if __name__ == '__main__':
+    from db import db
 
-db.create_all(app=app)
+    db.init_app(app)
 
-app.run(port=5000)
+    if app.config['DEBUG']:
+        @app.before_first_request
+        def create_tables():
+            db.create_all()
+
+    app.run(port=5000)
