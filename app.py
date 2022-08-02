@@ -7,11 +7,11 @@ from security import authenticate, identity
 from resources.user import UserRegister
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
-
-# from models.item import ItemModel
-# from models.user import UserModel
+from flask_sqlalchemy import SQLAlchemy
+from db import db
 
 app = Flask(__name__)
+
 app.secret_key = 'my_secret_key'
 app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=6000)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -25,5 +25,12 @@ api.add_resource(ItemList, '/items')
 api.add_resource(UserRegister, '/register')
 api.add_resource(Store, '/store/<string:name>')
 api.add_resource(StoreList, '/stores')
+
+db.init_app(app)
+from models.item import ItemModel
+from models.user import UserModel
+from models.store import StoreModel
+
+db.create_all(app=app)
 
 app.run(port=5000)
